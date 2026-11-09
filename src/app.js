@@ -1,4 +1,5 @@
 const express = require("express");
+const {adminAuth, userAuth} = require("./middleware/adminAuth");
 const app = express();
 
 
@@ -10,33 +11,26 @@ const app = express();
 //     res.send("Main Hi");
 //  })
 
- app.get("/user",(req,res,next)=>{
-    console.log("1st handler call")
-    next();
-    // res.send("1st response")
- },
-(req,res,next)=>{
-    console.log("2nd handler call");
-    // res.send("2nd response")
-    next();
-},
-(req,res,next)=>{
-    console.log("3nd handler call");
-    // res.send("3rd response")
-    next();
-},
-(req,res,next)=>{
-    console.log("4rth handler call");
-    // res.send("4th response")
-    next();
-},
-(req,res,next)=>{
-    console.log("5th handler call");
-    res.send("5th response")
-}
 
-)
+//Now admin api will work only when we know he is authenticated so we don't write the logic of authencated in each method
 
+
+app.use("/admin",adminAuth)
+
+app.get("/admin/data",(req,res)=>{
+    console.log("admin data");
+    res.send("admin data");
+})
+
+app.post("/admin/data",(req,res)=>{
+    console.log("admin data");
+    res.send("Post admin data");
+})
+
+app.get("/user/data",userAuth,(req,res)=>{
+    console.log("user data");
+    res.send("user data");
+})
 
 app.listen(3000,()=>{
     console.log("Server is running on port 3000");

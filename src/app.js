@@ -12,26 +12,33 @@ const app = express();
 //  })
 
 
-//Now admin api will work only when we know he is authenticated so we don't write the logic of authencated in each method
+//ERROR HANDLING MIDDLEWARE
 
-
-app.use("/admin",adminAuth)
-
-app.get("/admin/data",(req,res)=>{
-    console.log("admin data");
-    res.send("admin data");
+app.use("/",(req,res,next)=>{
+    console.log("First Error Middleware");
+    // if(err){
+    //     res.status(500).send("Internal Server Error");
+    // }
 })
 
-app.post("/admin/data",(req,res)=>{
-    console.log("admin data");
-    res.send("Post admin data");
+app.get("/userData",(req,res,next)=>{
+    console.log("User Data");
+    throw new Error("User Data Error");
 })
 
-app.get("/user/data",userAuth,(req,res)=>{
-    console.log("user data");
-    res.send("user data");
+app.use("/",(err,req,res,next)=>{
+    console.log("second Error Middleware");
+    if(err){
+        res.status(500).send("Internal Server Error");
+    }
 })
 
 app.listen(3000,()=>{
     console.log("Server is running on port 3000");
 });
+
+
+/*
+Top    -> normal middleware (json parser, auth, logger)
+Middle -> routes
+Bottom -> error handler */

@@ -94,6 +94,22 @@ app.delete("/user/:id",async(req,res)=>{
         res.status(500).send("Internal Server Error");
     }
 });
+
+app.patch("/user/:id", async(req,res)=>{
+    const id=req.params.id;
+    const updatedData=req.body;
+    const user = await User.findByIdAndUpdate(id,updatedData,{new:true});
+    console.log(user);
+    if(!user){
+        return res.status(404).send("User not found");
+    }
+    try{
+        res.send(user);
+    }
+    catch(error){
+        res.status(500).send("Internal Server Error");
+    }
+})
 const startServer=async()=>{
     try{
         await connectDB();

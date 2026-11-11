@@ -82,6 +82,18 @@ app.get("/feed",async(req,res)=>{
     }
 })
 
+app.delete("/user/:id",async(req,res)=>{
+    const user = await User.findByIdAndDelete(req.params.id);
+    if(!user){
+        return res.status(404).send("User not found");
+    }
+    try{
+        res.send(user);
+    }
+    catch(error){
+        res.status(500).send("Internal Server Error");
+    }
+});
 const startServer=async()=>{
     try{
         await connectDB();

@@ -11,12 +11,71 @@ console.log("app.js loaded",User.modelName);
 app.use(express.json()); // middleware to parse the body of the request
 
 app.post("/signup", async (req,res)=>{
-    console.log(req.body);
+    // console.log(req.body);
     const userObj=new User(req.body);
 
     try{
         await userObj.save();
         res.send("User created successfully");
+    }
+    catch(error){
+        res.status(500).send("Internal Server Error");
+    }
+})
+
+
+app.get("/user",async (req,res)=>{
+    const user=await User.findOne({email:req.body.email});     //findOne is a method to find a single document in the database
+    if(!user){
+        return res.status(404).send("User not found");
+    }
+    try{
+        res.send(user);
+    }
+    catch(error){
+        res.status(500).send("Internal Server Error");
+    }
+
+
+
+
+
+
+
+    // const users=await User.find({email:req.body.email});    //find is a method to find multiple documents in the database
+    // console.log(users,req.body.email);
+    // if(users.length===0){
+    //     return res.status(404).send("User not found");
+    // }
+    // try{
+    //     res.send(users);
+    // }
+    // catch(error){
+    //     res.status(500).send("Internal Server Error");
+    // }
+})
+
+
+app.get("/user/id", async (req, res) => {
+    try {
+      const { id } = req.params;
+  
+      const user = await User.findById(id);
+      if (!user) {
+        return res.status(404).send("User not found");
+      }
+  
+      res.send(user);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Internal Server Error");
+    }
+  });
+
+app.get("/feed",async(req,res)=>{
+    const users=await User.find({});
+    try{
+        res.send(users);
     }
     catch(error){
         res.status(500).send("Internal Server Error");

@@ -6,19 +6,13 @@ const User = require("./models/user");
 console.log("app.js loaded",User.modelName);
 
 
-app.get("/test", (req, res) => res.send("working"));
+// app.get("/test", (req, res) => res.send("working"));
+
+app.use(express.json()); // middleware to parse the body of the request
 
 app.post("/signup", async (req,res)=>{
-    console.log("signup route hit");
-    const userObj=new User({
-        firstName:"kalpesh",
-        lastName:"mahale",
-        email:"kalpesh@gmail.com",
-        password:"123456",
-        email:"kalpesh@gmail.com",
-        age:20,
-        phoneNumber:"1234567890",
-    });
+    console.log(req.body);
+    const userObj=new User(req.body);
 
     try{
         await userObj.save();

@@ -19,7 +19,7 @@ app.post("/signup", async (req,res)=>{
         res.send("User created successfully");
     }
     catch(error){
-        res.status(500).send("Internal Server Error");
+        res.status(404).send(error.message);
     }
 })
 
@@ -98,7 +98,7 @@ app.delete("/user/:id",async(req,res)=>{
 app.patch("/user/:id", async(req,res)=>{
     const id=req.params.id;
     const updatedData=req.body;
-    const user = await User.findByIdAndUpdate(id,updatedData,{new:true});
+    const user = await User.findByIdAndUpdate(id,updatedData,{new:true,runValidators:true});
     console.log(user);
     if(!user){
         return res.status(404).send("User not found");

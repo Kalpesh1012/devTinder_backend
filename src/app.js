@@ -59,6 +59,8 @@ app.get("/user",async (req,res)=>{
 app.get("/user/id", async (req, res) => {
     try {
       const { id } = req.params;
+
+
   
       const user = await User.findById(id);
       if (!user) {
@@ -97,6 +99,8 @@ app.delete("/user/:id",async(req,res)=>{
 
 app.patch("/user/:id", async(req,res)=>{
     const id=req.params.id;
+
+    
     const updatedData=req.body;
     const user = await User.findByIdAndUpdate(id,updatedData,{new:true,runValidators:true});
     console.log(user);
@@ -104,10 +108,21 @@ app.patch("/user/:id", async(req,res)=>{
         return res.status(404).send("User not found");
     }
     try{
-        res.send(user);
+        const ALLOWED_FIELDS = [ "name", "gender", "about"];
+
+        const FIELD_UPDATES= Object.keys(req.body).every(filed=>ALLOWED_FIELDS.includes(filed));
+  
+      console.log(FIELD_UPDATES);
+  
+        if(!FIELD_UPDATES){
+          throw new Error("Invalid fields");
+        }
+        else{
+            res.send(user);
+        }
     }
     catch(error){
-        res.status(500).send("Internal Server Error");
+        res.status(400).send(error.message);
     }
 })
 const startServer=async()=>{

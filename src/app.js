@@ -2,6 +2,8 @@ const express = require("express");
 const app = express();
 const connectDB = require("./config/database");
 const User = require("./models/user");
+const {validatorSignUp}=require("./helper/validation");
+const bcrypt=require("bcrypt");
 
 console.log("app.js loaded",User.modelName);
 
@@ -11,10 +13,18 @@ console.log("app.js loaded",User.modelName);
 app.use(express.json()); // middleware to parse the body of the request
 
 app.post("/signup", async (req,res)=>{
+
+
+    
     // console.log(req.body);
     const userObj=new User(req.body);
+    
 
     try{
+        validatorSignUp(req);
+
+        const hashPassword=await bcrypt.hash(req.body.password,10);
+        userObj.password=hashPassword;
         await userObj.save();
         res.send("User created successfully");
     }

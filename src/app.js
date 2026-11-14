@@ -34,6 +34,26 @@ app.post("/signup", async (req,res)=>{
 })
 
 
+app.post("/login",async(req,res)=>{
+    console.log("Login request received");
+    try{
+        const {email,password}=req.body;
+        const user=await User.findOne({email:email});
+        if(!user){
+            throw new Error("Email is incorrct")
+        }
+        const isPassWordCorrect=await bcrypt.compare(password,user.password);
+        if(!isPassWordCorrect){
+            throw new Error("Password is incorrect")
+        }
+        res.send("Login successful");
+    }
+    catch(error){
+        res.status(404).send(error.message);
+    }
+})
+
+
 app.get("/user",async (req,res)=>{
     const user=await User.findOne({email:req.body.email});     //findOne is a method to find a single document in the database
     if(!user){

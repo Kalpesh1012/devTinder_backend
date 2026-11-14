@@ -38,18 +38,19 @@ app.post("/signup", async (req,res)=>{
 
 
 app.post("/login",async(req,res)=>{
-    console.log("Login request received");
+
     try{
         const {email,password}=req.body;
         const user=await User.findOne({email:email});
+        console.log(user);
         if(!user){
             throw new Error("Email is incorrct")
         }
-        const isPassWordCorrect=await bcrypt.compare(password,user.password);
+        const isPassWordCorrect=await user.validatePassword(password);
         if(!isPassWordCorrect){
             throw new Error("Password is incorrect")
         }
-        const token =jwt.sign({_id:user._id},process.env.JWT_SECRET,{expiresIn:"1h"});
+        const token =await user.generateAuthToken();
         res.cookie("token",token,{expires:new Date(Date.now()+1000*60)});
         res.send("Login successful");
     }

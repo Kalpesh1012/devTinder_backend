@@ -4,6 +4,8 @@ const connectDB = require("./config/database");
 const User = require("./models/user");
 const {validatorSignUp}=require("./helper/validation");
 const bcrypt=require("bcrypt");
+const cookieParser=require("cookie-parser");
+const jwt=require("jsonwebtoken");
 
 console.log("app.js loaded",User.modelName);
 
@@ -11,7 +13,7 @@ console.log("app.js loaded",User.modelName);
 // app.get("/test", (req, res) => res.send("working"));
 
 app.use(express.json()); // middleware to parse the body of the request
-
+app.use(cookieParser()); // middleware to parse the cookies of the request
 app.post("/signup", async (req,res)=>{
 
 
@@ -46,7 +48,29 @@ app.post("/login",async(req,res)=>{
         if(!isPassWordCorrect){
             throw new Error("Password is incorrect")
         }
+        const token =jwt.sign({_id:user._id},process.env.JWT_SECRET);
+        res.cookie("token",token);
         res.send("Login successful");
+    }
+    catch(error){
+        res.status(404).send(error.message);
+    }
+})
+
+
+app.get("/profile",async(req,res)=>{
+    try{
+        const cookies=req.cookies;
+        console.log(cookies);
+        const decoded=jwt.verify(cookies.token,process.env.JWT_SECRET);
+        console.log(decoded);
+        const {_id}=decoded;
+        const user=await User.findById(_id);
+
+        if(!user){
+            throw new Error("User not found");
+        }
+        res.send(user);
     }
     catch(error){
         res.status(404).send(error.message);

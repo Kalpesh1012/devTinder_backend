@@ -6,6 +6,7 @@ const {validatorSignUp}=require("./helper/validation");
 const bcrypt=require("bcrypt");
 const cookieParser=require("cookie-parser");
 const jwt=require("jsonwebtoken");
+const {userAuth}=require("./middleware/user");
 
 console.log("app.js loaded",User.modelName);
 
@@ -48,8 +49,8 @@ app.post("/login",async(req,res)=>{
         if(!isPassWordCorrect){
             throw new Error("Password is incorrect")
         }
-        const token =jwt.sign({_id:user._id},process.env.JWT_SECRET);
-        res.cookie("token",token);
+        const token =jwt.sign({_id:user._id},process.env.JWT_SECRET,{expiresIn:"1h"});
+        res.cookie("token",token,{expires:new Date(Date.now()+1000*60)});
         res.send("Login successful");
     }
     catch(error){
@@ -58,14 +59,10 @@ app.post("/login",async(req,res)=>{
 })
 
 
-app.get("/profile",async(req,res)=>{
+app.get("/profile",userAuth,async(req,res)=>{
     try{
-        const cookies=req.cookies;
-        console.log(cookies);
-        const decoded=jwt.verify(cookies.token,process.env.JWT_SECRET);
-        console.log(decoded);
-        const {_id}=decoded;
-        const user=await User.findById(_id);
+       
+        const user=req.user;
 
         if(!user){
             throw new Error("User not found");
@@ -77,108 +74,17 @@ app.get("/profile",async(req,res)=>{
     }
 })
 
-
-app.get("/user",async (req,res)=>{
-    const user=await User.findOne({email:req.body.email});     //findOne is a method to find a single document in the database
-    if(!user){
-        return res.status(404).send("User not found");
-    }
+app.post("/sendconnectionrequest",userAuth,async(req,res)=>{
     try{
-        res.send(user);
+        const user=req.user;
+        console.log(user);
+        res.send(`Connection request send by ${user.firstName}`);
     }
     catch(error){
-        res.status(500).send("Internal Server Error");
-    }
-
-
-
-
-
-
-
-    // const users=await User.find({email:req.body.email});    //find is a method to find multiple documents in the database
-    // console.log(users,req.body.email);
-    // if(users.length===0){
-    //     return res.status(404).send("User not found");
-    // }
-    // try{
-    //     res.send(users);
-    // }
-    // catch(error){
-    //     res.status(500).send("Internal Server Error");
-    // }
-})
-
-
-app.get("/user/id", async (req, res) => {
-    try {
-      const { id } = req.params;
-
-
-  
-      const user = await User.findById(id);
-      if (!user) {
-        return res.status(404).send("User not found");
-      }
-  
-      res.send(user);
-    } catch (error) {
-      console.error(error);
-      res.status(500).send("Internal Server Error");
-    }
-  });
-
-app.get("/feed",async(req,res)=>{
-    const users=await User.find({});
-    try{
-        res.send(users);
-    }
-    catch(error){
-        res.status(500).send("Internal Server Error");
-    }
-})
-
-app.delete("/user/:id",async(req,res)=>{
-    const user = await User.findByIdAndDelete(req.params.id);
-    if(!user){
-        return res.status(404).send("User not found");
-    }
-    try{
-        res.send(user);
-    }
-    catch(error){
-        res.status(500).send("Internal Server Error");
+        res.status(404).send(error.message);
     }
 });
 
-app.patch("/user/:id", async(req,res)=>{
-    const id=req.params.id;
-
-    
-    const updatedData=req.body;
-    const user = await User.findByIdAndUpdate(id,updatedData,{new:true,runValidators:true});
-    console.log(user);
-    if(!user){
-        return res.status(404).send("User not found");
-    }
-    try{
-        const ALLOWED_FIELDS = [ "name", "gender", "about"];
-
-        const FIELD_UPDATES= Object.keys(req.body).every(filed=>ALLOWED_FIELDS.includes(filed));
-  
-      console.log(FIELD_UPDATES);
-  
-        if(!FIELD_UPDATES){
-          throw new Error("Invalid fields");
-        }
-        else{
-            res.send(user);
-        }
-    }
-    catch(error){
-        res.status(400).send(error.message);
-    }
-})
 const startServer=async()=>{
     try{
         await connectDB();

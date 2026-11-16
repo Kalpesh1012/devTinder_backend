@@ -62,6 +62,24 @@ const userSchema = new mongoose.Schema(
       maxlength: 15,
       trim: true,
     },
+    profilePicture: {
+      type: [String],
+      required: true,
+      validate(value) {
+        if (!value.length) {
+          throw new Error("Profile picture is required");
+        }
+      },
+    },
+    skills:{
+      type: [String],
+      required: true,
+      validate(value) {
+        if (!value.length) {
+          throw new Error("Skills are required");
+        }
+      },
+    }
   },
   { timestamps: true },
 );

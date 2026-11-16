@@ -19,4 +19,18 @@
     }
 }
 
-module.exports={validatorSignUp};
+const validatorUpdateProfile=(req)=>{
+    const VALID_FIELDS_TO_UPDATE=[
+        "firstName",
+        "lastName",
+        "gender",
+        "profilePicture",
+        "skills",
+    ]
+    console.log(req.body);
+    const validateFields=Object.keys(req.body).every(keys=>VALID_FIELDS_TO_UPDATE.includes(keys))
+    console.log(validateFields);
+    return validateFields;
+}
+
+module.exports={validatorSignUp,validatorUpdateProfile};

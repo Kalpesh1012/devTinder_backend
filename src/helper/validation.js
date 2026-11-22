@@ -33,4 +33,16 @@ const validatorUpdateProfile=(req)=>{
     return validateFields;
 }
 
-module.exports={validatorSignUp,validatorUpdateProfile};
+const validatorConnection=(req)=>{
+    const VALID_FIELDS=[
+        "fromUserID",
+        "toUserID",
+        "status",
+    ]
+
+    const validateFields=Object.keys(req.body).every(keys=>VALID_FIELDS.includes(keys))
+    console.log(validateFields)
+    return validateFields;
+}
+
+module.exports={validatorSignUp,validatorUpdateProfile,validatorConnection};

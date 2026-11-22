@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: true,
+      // index:true,
       unique: true,
       trim: true,
       minlength: 3,
@@ -61,6 +62,7 @@ const userSchema = new mongoose.Schema(
       minlength: 10,
       maxlength: 15,
       trim: true,
+      sparse: true // Allows multiple users to have NO phoneNumber, while keeping real ones unique!
     },
     profilePicture: {
       type: [String],

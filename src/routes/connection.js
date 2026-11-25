@@ -4,7 +4,7 @@ const { userAuth } = require("../middleware/user");
 const connectionRequest=require('../models/connectionRequest');
 const { validatorConnection } = require("../helper/validation");
 const User=require('../models/user');
-
+const mongoose = require("mongoose");
 connectionRouter.post("/request/send/:status/:toUserID", userAuth, async (req, res) => {
     try {
       // const validFields= validatorConnection(req)/
@@ -70,6 +70,60 @@ connectionRouter.post("/request/send/:status/:toUserID", userAuth, async (req, r
 
     } catch (error) {
       res.status(404).send(error.message);
+    }
+  });
+
+
+  connectionRouter.post("/request/review/:status/:toUserID",userAuth,async (req,res)=>{
+    try{
+      const user=req.user;
+      const status=req.params.status
+      const toUserID=req.params.toUserID
+
+      // Status VAlidation
+      const ALLOWED_STATUS=["accepted","rejected"]
+      if(!ALLOWED_STATUS.includes(status)){
+        returnres.json({message:"Status is invalid"})
+      }
+
+      // Validate ObjectId format before querying MongoDB
+      if (!mongoose.Types.ObjectId.isValid(toUserID)) {
+        return res.status(400).json({ message: "Invalid User ID format" });
+      }
+
+      //toUserID shoulbe in DB
+      const isToUserIDValid=await User.findOne({
+        _id:toUserID
+      })
+      if(!isToUserIDValid){
+       return res.json({message:"Invalid User"})
+      }
+
+      const interstedRequest=await connectionRequest.findOne({
+        fromUserID:toUserID,
+        toUserID:user._id,
+        status:"interested"
+      })
+
+      console.log(interstedRequest)
+
+      if(!interstedRequest){
+       return res.json({message:"No Request Found"})
+      }
+
+     
+
+      const connectionObj= await connectionRequest.findByIdAndUpdate(
+        interstedRequest._id,
+        { $set: { status: status } }, // Must be an object with $set!
+        {new:true}
+      )
+
+      res.send({data:connectionObj});
+
+    }
+    catch(err){
+      res.status(400).send(`Error: ${err}`)
     }
   });
 

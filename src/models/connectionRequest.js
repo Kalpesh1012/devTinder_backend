@@ -1,9 +1,11 @@
 const mongoose = require("mongoose");
+const User = require("./user");
 
 const connectRequestSchema = new mongoose.Schema({
     fromUserID: {
        type: mongoose.Schema.Types.ObjectId,
        require:true, //To take user id from mongodb
+       ref:"User"
     },
     toUserID: {
         type: mongoose.Schema.Types.ObjectId,
